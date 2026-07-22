@@ -1,0 +1,151 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    name: Test Backend
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: leethub_test
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 3306:3306
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        working-directory: leethub-backend
+        run: ./gradlew clean build --no-daemon
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./leethub-backend/build/reports/jacoco/test/jacocoTestReport.xml
+
+  lint-backend:
+    runs-on: ubuntu-latest
+    name: Lint Backend
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Run checkstyle
+        working-directory: leethub-backend
+        run: ./gradlew checkstyleMain --no-daemon || true
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    name: Test Frontend
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '21'
+          cache: 'npm'
+          cache-dependency-path: leethub-frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: leethub-frontend
+        run: npm ci --frozen-lockfile
+
+      - name: Run linter
+        working-directory: leethub-frontend
+        run: npm run lint
+
+      - name: Build
+        working-directory: leethub-frontend
+        run: npm run build
+
+  build-docker:
+    runs-on: ubuntu-latest
+    name: Build Docker Images
+    needs: [test-backend, lint-backend, test-frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: leethub-backend
+          file: leethub-backend/docker/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ECR_REGISTRY }}/leethub-backend:latest
+            ${{ secrets.ECR_REGISTRY }}/leethub-backend:${{ github.sha }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: leethub-frontend
+          file: leethub-frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.ECR_REGISTRY }}/leethub-frontend:latest
+            ${{ secrets.ECR_REGISTRY }}/leethub-frontend:${{ github.sha }}
+
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'

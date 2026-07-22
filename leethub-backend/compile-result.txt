@@ -1,0 +1,36 @@
+﻿To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :clean
+
+> Task :compileJava
+.\gradlew.bat : D:\LEETHUB\leethub-backend\src\main\java\com\leethubai\sync\service\FileTreeBuilder.java:117: error: 
+for-each not applicable to expression type
+At line:1 char:1
++ .\gradlew.bat clean compileJava --no-daemon 2>&1 | Out-File -Encoding ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\LEETHUB\leet...expression type:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+                for (String pattern : aiExplanation.getPatterns()) {
+                                                               ^
+  required: array or java.lang.Iterable
+  found:    String
+Note: D:\LEETHUB\leethub-backend\src\main\java\com\leethubai\auth\service\GitHubOAuthService.java uses unchecked or 
+unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+1 error
+
+> Task :compileJava FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+BUILD FAILED in 13s
+2 actionable tasks: 2 executed

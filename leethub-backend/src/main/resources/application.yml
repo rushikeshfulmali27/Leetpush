@@ -1,0 +1,91 @@
+server:
+  port: 8080
+
+spring:
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+  application:
+    name: leethub-backend
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3307}/${DB_NAME:leethub}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:devpassword}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+# Application properties
+app:
+  jwt:
+    secret: ${JWT_SECRET:Y2hhbmdlbWUtZGV2LW9ubHkta2V5LWRvLW5vdC11c2UtaW4tcHJvZHVjdGlvbg==}
+    access-token-expiration-ms: 3600000       # 1 hour
+    refresh-token-expiration-ms: 2592000000   # 30 days
+    algorithm: HS256
+
+  encryption:
+    key: ${ENCRYPTION_KEY:MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=}
+    algorithm: AES_256_GCM
+
+  github:
+    client-id: ${GITHUB_CLIENT_ID:Ov23liYrHrRxQjuYcyRn}
+    client-secret: ${GITHUB_CLIENT_SECRET:}
+    api-url: https://api.github.com
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      model: ${OPENAI_MODEL:gpt-4o-mini}
+      enabled: ${OPENAI_ENABLED:false}
+    gemini:
+      api-key: ${GEMINI_API_KEY:}
+      model: ${GEMINI_MODEL:gemini-2.0-flash}
+      enabled: ${GEMINI_ENABLED:true}
+
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,http://localhost:5173,https://leetpush.com,https://www.leetpush.com}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: Authorization,Content-Type
+    allow-credentials: true
+    max-age: 3600
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    root: INFO
+    com.leethubai: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+    org.springframework.security: WARN

@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "LeetPush AI",
+  "version": "1.0.0",
+  "description": "Automatically sync your LeetCode solutions to GitHub with AI-generated explanations.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://leetcode.com/*",
+    "http://localhost:8080/*",
+    "http://localhost:5173/*",
+    "https://api.leetpush.com/*",
+    "https://leetpush.com/*",
+    "https://www.leetpush.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://leetcode.com/problems/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "http://localhost:5173/*",
+        "https://leetpush.com/*",
+        "https://www.leetpush.com/*"
+      ],
+      "js": ["token_bridge.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LeetHub AI"
+  }
+}

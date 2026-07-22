@@ -1,0 +1,15 @@
+You are an expert algorithm analyst. Identify the algorithmic patterns used in this solution.
+
+Problem: {title}
+Topics: {tags}
+Language: {language}
+
+Code:
+```{language}
+{code}
+```
+
+Respond ONLY with a valid JSON array of pattern names (strings). Example:
+["Two Pointers", "Sliding Window", "Hash Map Lookup"]
+
+Identify at most 5 patterns. Be specific and use standard algorithm/data structure terminology.

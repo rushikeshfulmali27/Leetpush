@@ -1,0 +1,67 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: leethub
+      DB_USERNAME: root
+      DB_PASSWORD: devpassword
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-your-client-id}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-your-client-secret}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - leethub-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: devpassword
+      MYSQL_DATABASE: leethub
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - leethub-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - leethub-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  leethub-network:
+    driver: bridge

@@ -1,0 +1,1 @@
+ALTER TABLE solutions MODIFY COLUMN leetcode_id VARCHAR(100) NOT NULL;

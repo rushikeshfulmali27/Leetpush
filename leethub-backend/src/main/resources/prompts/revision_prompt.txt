@@ -1,0 +1,12 @@
+Create a concise spaced-repetition revision card for this LeetCode solution.
+
+Problem: {title}
+Difficulty: {difficulty}
+Pattern/Topics: {tags}
+
+Respond ONLY with a valid JSON object:
+{
+  "keyInsight": "The single most important insight needed to solve this problem (1-2 sentences).",
+  "rememberThis": "What to recall in an interview setting — the approach in plain English (2-3 sentences).",
+  "triggerKeywords": ["keyword1", "keyword2", "keyword3"]
+}

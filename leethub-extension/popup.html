@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LeetHub AI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 340px;
+      min-height: 420px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid #1f2937;
+      background: #0f172a;
+    }
+    .logo { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo span { color: #10b981; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+    .status-dot.offline { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+    /* Content */
+    .content { padding: 16px; }
+
+    /* Auth section */
+    #auth-section { display: none; }
+    #auth-section.visible { display: block; }
+    .auth-message { color: #9ca3af; font-size: 12px; margin-bottom: 12px; line-height: 1.5; }
+    .btn {
+      width: 100%; padding: 9px 12px; border-radius: 7px; border: none;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #10b981; color: #fff; }
+    .btn-outline { background: transparent; color: #6b7280; border: 1px solid #374151; margin-top: 8px; }
+
+    /* Main section */
+    #main-section { display: none; }
+    #main-section.visible { display: block; }
+
+    /* Stats row */
+    .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .stat-card {
+      background: #1f2937; border-radius: 8px; padding: 10px 8px; text-align: center;
+    }
+    .stat-value { font-size: 20px; font-weight: 700; color: #f9fafb; }
+    .stat-label { font-size: 10px; color: #6b7280; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* History */
+    .section-title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.6px; color: #4b5563; margin-bottom: 8px;
+    }
+    .history-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+    .history-item {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1f2937; border-radius: 7px; padding: 8px 10px;
+    }
+    .history-title { font-weight: 500; color: #e5e7eb; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-meta { font-size: 10px; color: #6b7280; margin-top: 2px; }
+    .badge { font-size: 10px; font-weight: 600; border-radius: 4px; padding: 2px 6px; }
+    .badge-easy   { background: rgba(16,185,129,0.12); color: #10b981; }
+    .badge-medium { background: rgba(245,158,11,0.12); color: #f59e0b; }
+    .badge-hard   { background: rgba(239,68,68,0.12); color: #ef4444; }
+
+    .empty-state { color: #4b5563; font-size: 12px; text-align: center; padding: 24px 0; }
+
+    /* Footer */
+    .footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-top: 1px solid #1f2937;
+      margin-top: 12px;
+    }
+    .footer a { color: #10b981; font-size: 11px; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    .logout-btn { background: none; border: none; color: #4b5563; font-size: 11px; cursor: pointer; }
+    .logout-btn:hover { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">LeetHub <span>AI</span></div>
+  <div class="status-dot" id="statusDot"></div>
+</div>
+
+<div class="content">
+  <!-- Not authenticated -->
+  <div id="auth-section">
+    <p class="auth-message">
+      Sign in to automatically sync your LeetCode solutions to GitHub with AI-generated explanations.
+    </p>
+    <button class="btn btn-primary" id="loginBtn">Sign in with GitHub</button>
+    <button class="btn btn-outline" id="tokenBtn">Enter API Token</button>
+    <div id="tokenInput" style="display:none; margin-top:10px;">
+      <input type="text" id="tokenField" placeholder="Paste your JWT here…"
+        style="width:100%; background:#1f2937; border:1px solid #374151; border-radius:6px; padding:8px 10px; color:#f9fafb; font-size:12px; outline:none;" />
+      <button class="btn btn-primary" id="saveTokenBtn" style="margin-top:6px;">Save Token</button>
+    </div>
+  </div>
+
+  <!-- Authenticated -->
+  <div id="main-section">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statToday">—</div>
+        <div class="stat-label">Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statStreak">—</div>
+        <div class="stat-label">Streak</div>
+      </div>
+    </div>
+
+    <div class="section-title">Recent Syncs</div>
+    <div class="history-list" id="historyList">
+      <div class="empty-state" id="emptyHistory">No syncs yet — solve a problem on LeetCode!</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="http://localhost:5173/dashboard" target="_blank">Open Dashboard ↗</a>
+  <button class="logout-btn" id="logoutBtn" style="display:none">Sign out</button>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
