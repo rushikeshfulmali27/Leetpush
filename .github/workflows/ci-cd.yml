@@ -46,7 +46,7 @@ jobs:
 
       - name: Build with Gradle
         working-directory: leethub-backend
-        run: ./gradlew clean build --no-daemon
+        run: java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain clean build --no-daemon
 
   lint-backend:
     runs-on: ubuntu-latest
@@ -60,7 +60,7 @@ jobs:
           distribution: 'temurin'
       - name: Run checkstyle
         working-directory: leethub-backend
-        run: ./gradlew checkstyleMain --no-daemon || true
+        run: java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain checkstyleMain --no-daemon || true
 
   test-frontend:
     runs-on: ubuntu-latest
