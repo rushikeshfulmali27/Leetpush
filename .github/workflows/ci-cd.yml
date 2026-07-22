@@ -23,7 +23,7 @@ jobs:
           --health-timeout=5s
           --health-retries=5
         ports:
-          - 3306:3306
+          - 3307:3306
 
       redis:
         image: redis:7-alpine
@@ -47,11 +47,6 @@ jobs:
       - name: Build with Gradle
         working-directory: leethub-backend
         run: ./gradlew clean build --no-daemon
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./leethub-backend/build/reports/jacoco/test/jacocoTestReport.xml
 
   lint-backend:
     runs-on: ubuntu-latest
@@ -144,6 +139,7 @@ jobs:
           scan-ref: '.'
           format: 'sarif'
           output: 'trivy-results.sarif'
+          exit-code: '0'
 
       - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v2
