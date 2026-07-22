@@ -1,17 +1,17 @@
 # ---- Build Stage ----
-FROM node:21-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --frozen-lockfile
+RUN rm -f package-lock.json && npm install
 
 # Build application
 COPY . .
 RUN npm run build
 
 # ---- Runtime Stage ----
-FROM node:21-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 RUN npm install -g serve && \
