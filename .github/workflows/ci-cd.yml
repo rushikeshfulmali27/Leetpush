@@ -101,32 +101,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-
-      - name: Build and push backend image
+      - name: Build backend image
         uses: docker/build-push-action@v4
         with:
           context: leethub-backend
           file: leethub-backend/docker/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.ECR_REGISTRY }}/leethub-backend:latest
-            ${{ secrets.ECR_REGISTRY }}/leethub-backend:${{ github.sha }}
+          push: false
 
-      - name: Build and push frontend image
+      - name: Build frontend image
         uses: docker/build-push-action@v4
         with:
           context: leethub-frontend
           file: leethub-frontend/Dockerfile
-          push: true
-          tags: |
-            ${{ secrets.ECR_REGISTRY }}/leethub-frontend:latest
-            ${{ secrets.ECR_REGISTRY }}/leethub-frontend:${{ github.sha }}
+          push: false
 
   security-scan:
     runs-on: ubuntu-latest
