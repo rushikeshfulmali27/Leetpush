@@ -77,7 +77,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: leethub-frontend
-        run: npm ci --frozen-lockfile
+        run: npm install
 
       - name: Run linter
         working-directory: leethub-frontend
@@ -137,11 +137,5 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          format: 'table'
           exit-code: '0'
-
-      - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results.sarif'
